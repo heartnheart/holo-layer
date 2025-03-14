@@ -22,6 +22,7 @@ import platform
 import signal
 import sys
 import threading
+import os
 
 from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout
 from PyQt6.QtCore import Qt, QTimer
@@ -40,6 +41,7 @@ from plugin.indent_line import IndentLine
 from plugin.type_animation import TypeAnimation
 from PyQt6.QtGui import QGuiApplication, QPainterPath
 from utils import *
+import sys
 
 class HoloLayer:
     def __init__(self, args):
@@ -229,6 +231,7 @@ class HoloWindow(QWidget):
     def __init__(self) -> None:
         super().__init__()
 
+        self.window_bias_x, self.window_bias_y = 0, 0
         self.active_window_border_color = None
         self.inactive_window_border_color = None
 
@@ -252,6 +255,7 @@ class HoloWindow(QWidget):
         self.setStyleSheet("border: none;")
         self.setContentsMargins(0, 0, 0, 0)
         self.setStyleSheet("background-color:transparent;")
+        # self.setStyleSheet("background-color:rgba(0,255,0, 0.05);")
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
 
         self.screen_index = 0
@@ -288,7 +292,8 @@ class HoloWindow(QWidget):
                     window_flags |= Qt.WindowType.Tool
                     window_flags |= Qt.WindowType.X11BypassWindowManagerHint
                 self.setWindowFlags(window_flags)
-                self.window_bias_x, self.window_bias_y = 0, 0
+                # 在这里强制设置为0 会在emacs 实际不在主屏的时候，如果只切换 focus （alt-tab)不切换 screen 的时候出问题
+                # self.window_bias_x, self.window_bias_y = 0, 0
                 self.showFullScreen()
 
     def paintEvent(self, event):
@@ -359,7 +364,7 @@ class HoloWindow(QWidget):
         self.update()
 
     def update_screen_geometry_info(self, screen_index):
-        if platform.system() != "Darwin":
+        if platform.system() not in ["Darwin", "Windows"]:
             return
         if screen_index != self.screen_index:
             self.screen_index = screen_index
@@ -410,6 +415,9 @@ class HoloWindow(QWidget):
         self.update()
 
 if __name__ == "__main__":
+    os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "0"
+    # os.environ["QT_SCALE_FACTOR"] = "1"
+
     if platform.system() == "Darwin":
         import AppKit
         info = AppKit.NSBundle.mainBundle().infoDictionary()

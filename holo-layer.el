@@ -354,7 +354,9 @@ Default is disable.")
         (setq holo-layer-internal-process
               (apply 'start-process
                      holo-layer-name holo-layer-name
-                     holo-layer-internal-process-prog holo-layer-internal-process-args)))
+                     holo-layer-internal-process-prog holo-layer-internal-process-args))
+        (set-process-coding-system holo-layer-internal-process 'undecided-dos  'undecided-unix)
+        )
       (set-process-query-on-exit-flag holo-layer-internal-process nil))))
 
 (defvar holo-layer-stop-process-hook nil)
@@ -505,7 +507,7 @@ Including title-bar, menu-bar, offset depends on window system, and border."
           width
           height
           (cl-position (frame-monitor-geometry) (display-monitor-attributes-list)
-                       :test (lambda (f attr) (equal f (cdr (car attr))))))))
+                       :test (lambda (f attr) (equal f (cdr (cadr attr))))))))
 
 (defun holo-layer-eaf-fullscreen-p ()
   (and (featurep 'eaf)
@@ -907,7 +909,7 @@ Including title-bar, menu-bar, offset depends on window system, and border."
     (string-to-number (frame-parameter nil 'outer-window-id))))
 
 (defun holo-layer--get-emacs-name ()
-  (frame-parameter nil 'name))
+  (concat (frame-parameter nil 'name) " (Ubuntu-22.04)"))
 
 (defun holo-layer-get-theme-mode ()
   (format "%s" (frame-parameter nil 'background-mode)))
